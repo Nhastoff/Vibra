@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Unpack reviewed desktop sources
-        run: unzip -q desktop-source-0.1.1.zip -d app
+        run: unzip -q desktop-source-0.1.2.zip -d app
       - uses: pnpm/action-setup@v4
         with:
           package_json_file: app/package.json
@@ -34,6 +34,11 @@ jobs:
       - name: Verify server on macOS
         working-directory: app
         run: node --test --test-isolation=none test/backend.test.mjs
+      - name: Verify signed application updates and native restart
+        working-directory: app
+        run: |
+          node --test test/update-core.test.mjs
+          node scripts/smoke-code-update.mjs
       - name: Build DMG and ZIP
         working-directory: app
         run: node scripts/build-desktop.mjs mac --${{ matrix.arch }}
@@ -65,4 +70,4 @@ jobs:
         run: |
           cd installers
           sha256sum *.dmg *.zip > SHA256SUMS-macOS.txt
-          gh release upload v0.1.1 *.dmg *.zip SHA256SUMS-macOS.txt --clobber
+          gh release upload v0.1.2 *.dmg *.zip SHA256SUMS-macOS.txt --clobber
