@@ -1,1 +1,68 @@
-
+name: macOS installers
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15-intel
+            arch: x64
+          - runner: macos-15
+            arch: arm64
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unpack reviewed desktop sources
+        run: unzip -q desktop-source-0.1.1.zip -d app
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: app/package.json
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install locked build dependencies
+        working-directory: app
+        run: pnpm install --frozen-lockfile
+      - name: Verify server on macOS
+        working-directory: app
+        run: node --test --test-isolation=none test/backend.test.mjs
+      - name: Build DMG and ZIP
+        working-directory: app
+        run: node scripts/build-desktop.mjs mac --${{ matrix.arch }}
+      - name: Launch packaged GUI with isolated SQLite data
+        working-directory: app
+        run: node scripts/smoke-macos.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Vibra-macos-${{ matrix.arch }}
+          if-no-files-found: error
+          compression-level: 0
+          path: |
+            app/dist/*.dmg
+            app/dist/*.zip
+  publish:
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: installers
+          merge-multiple: true
+      - name: Publish tested macOS installers to prepared release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          cd installers
+          sha256sum *.dmg *.zip > SHA256SUMS-macOS.txt
+          gh release upload v0.1.1 *.dmg *.zip SHA256SUMS-macOS.txt --clobber
