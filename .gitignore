@@ -1,0 +1,9 @@
+# This repository contains only distribution instructions and artwork.
+*.exe
+*.deb
+*.blockmap
+*.sqlite*
+cred.txt
+.env*
+private/
+assets/
