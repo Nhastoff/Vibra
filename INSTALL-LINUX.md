@@ -3,7 +3,7 @@
 Откройте [выпуск 0.1.8](https://github.com/Nhastoff/Vibra/releases/tag/v0.1.8). Полные сборки для Linux x64 (Intel/AMD):
 
 - Ubuntu/Debian: **Vibra-0.1.8-linux-amd64.deb**. Закройте Vibra и выполните `sudo apt install ./Vibra-0.1.8-linux-amd64.deb`.
-- Другие совместимые дистрибутивы: **Vibra-0.1.8-linux-x64.AppImage**. Разрешите запуск файла в его свойствах и откройте. Для AppImage может требоваться FUSE 2.
+- Другие совместимые дистрибутивы: **Vibra-0.1.8-linux-x86_64.AppImage**. Разрешите запуск файла в его свойствах и откройте. Для AppImage может требоваться FUSE 2.
 
 Контрольные суммы — SHA256SUMS-native.txt. Проверка: `sha256sum Vibra-0.1.8-linux-amd64.deb`. Linux ARM пока не выпускается. Запускайте приложение обычным пользователем с включённым sandbox.
 
